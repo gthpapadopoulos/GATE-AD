@@ -1,0 +1,24 @@
+dataset: mvtec
+data_root: ./datasets/mvtec
+
+model_name: dinov2_vitl14_reg
+backbone_ckpt: ./weights/dinov2_vitl14_reg4_pretrain.pth
+device: cuda:0
+resolution: 488
+backbone_last_n_layers: 8
+backbone_layer_agg: avg
+
+shots_list: [1, 2, 4, 8]
+seed: 0
+
+epochs: 2000
+lr: 3.0e-4
+mask_ratio: 0.2
+a: 2.0
+
+gnn_layers: 3
+latent_dim: 256
+gnn_hidden_dims: [256, 256, 256]
+dropout: 0.3
+
+topk_ratio: 0.025

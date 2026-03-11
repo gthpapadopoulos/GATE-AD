@@ -1,0 +1,26 @@
+dataset: mpdd
+data_root: ./datasets/mpdd
+objects: [bracket_black, bracket_brown, bracket_white, connector, metal_plate, tubes]
+
+model_name: dinov3_vitl16
+backbone_ckpt: ./weights/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth
+device: cuda:0
+resolution: 512
+backbone_last_n_layers: 8
+backbone_layer_agg: avg
+
+shots_list: [1, 2, 4, 8]
+seeds_list: [0, 1, 2]
+
+epochs: 2000
+lr: 3.0e-4
+mask_ratio: 0.2
+a: 2.0
+
+gnn_layers: 3
+latent_dim: 256
+gnn_hidden_dims: [256, 256, 256]
+dropout: 0.3
+
+topk_ratio: 0.05
+image_score_pool: max
