@@ -19,25 +19,13 @@
 
 </div>
 
-> **GATE-AD has been accepted to NeurIPS 2026.** This repository contains the official implementation.
-
 <p align="center">
   <img src="assets/gate_ad_overview.png" alt="Overview of the GATE-AD framework" width="100%">
 </p>
 
 ## Overview
 
-GATE-AD is a reconstruction-based framework for few-shot industrial visual anomaly detection. It models normality through local contextual relations: a patch is considered normal when its representation can be recovered consistently from its learned dependencies with neighboring patches.
-
-The method:
-
-- extracts dense patch-level features with a frozen DINOv2 or DINOv3 backbone;
-- organizes the patch tokens as a spatial neighborhood graph;
-- learns local dependencies with a masked Graph Attention Network encoder;
-- aligns graph-conditioned predictions and frozen visual features in a shared latent space; and
-- detects and localizes anomalies using Scaled Cosine Error reconstruction scores.
-
-Across MVTec AD, VisA, and MPDD, GATE-AD achieves strong detection and localization performance in 1- to 8-shot settings while maintaining low inference latency. See the [paper](https://arxiv.org/abs/2603.15300) for complete results and ablations.
+Few-Shot Industrial Visual Anomaly Detection (FS-IVAD) is a critical task in modern manufacturing, where automated product inspection systems must identify rare defects using only a handful of normal, defect-free training samples. Existing approaches typically model normality by assessing each patch largely through its individual appearance, e.g., through similarity to stored normal features, reconstruction from support samples, or distance from a learned normal representation. This paper introduces GATE-AD, whose key contribution is to instead model few-shot normality through local contextual relations: a patch is considered normal when it can be consistently recovered from its learned dependencies with its spatial neighbors. To realize this formulation, frozen self-supervised ViT patch tokens are organized on a spatial neighbor graph and processed by a Graph Attention Network (GAT), while representation alignment and a Scaled Cosine Error (SCE) objective enable reconstruction-based anomaly scoring. Node masking and attention dropout further regularize learning in the low-shot regime. On MVTec AD, VisA, and MPDD, GATE-AD achieves strong detection and localization performance across 1- to 8-shot settings, attaining the highest image-level AUROC in 10 of 12 settings and the highest image-level AP in 8 of 12 settings under a unified evaluation protocol, while also achieving the lowest inference latency among the compared methods. In order to facilitate reproducibility and further research, the source code of GATE-AD is available in this repository.
 
 ## Installation
 
