@@ -1,32 +1,67 @@
-## Conda Environment Setup
+<div align="center">
 
-Python `>=3.10` is required.
+# GATE-AD: Graph Attention Network Encoding for Few-Shot Industrial Visual Anomaly Detection
+
+### NeurIPS 2026
+
+[![arXiv](https://img.shields.io/badge/arXiv-2603.15300-b31b1b.svg)](https://arxiv.org/abs/2603.15300)
+[![NeurIPS](https://img.shields.io/badge/NeurIPS-2026-4b44ce.svg)](https://neurips.cc/virtual/2026/poster/151322)
+[![Python](https://img.shields.io/badge/Python-%E2%89%A53.10-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
+
+**[Aggelos Psiris](mailto:aggelospsiris@hua.gr)** ·
+**[Yannis Panagakis](mailto:yannisp@di.uoa.gr)** ·
+**[Maria Vakalopoulou](mailto:maria.vakalopoulou@centralesupelec.fr)** ·
+**[Georgios Th. Papadopoulos](mailto:g.th.papadopoulos@hua.gr)**
+
+[[Paper](https://arxiv.org/abs/2603.15300)]
+[[NeurIPS](https://neurips.cc/virtual/2026/poster/151322)]
+[[Code](https://github.com/gthpapadopoulos/GATE-AD)]
+
+</div>
+
+> **GATE-AD has been accepted to NeurIPS 2026.** This repository contains the official implementation.
+
+<p align="center">
+  <img src="assets/gate_ad_overview.png" alt="Overview of the GATE-AD framework" width="100%">
+</p>
+
+## Overview
+
+GATE-AD is a reconstruction-based framework for few-shot industrial visual anomaly detection. It models normality through local contextual relations: a patch is considered normal when its representation can be recovered consistently from its learned dependencies with neighboring patches.
+
+The method:
+
+- extracts dense patch-level features with a frozen DINOv2 or DINOv3 backbone;
+- organizes the patch tokens as a spatial neighborhood graph;
+- learns local dependencies with a masked Graph Attention Network encoder;
+- aligns graph-conditioned predictions and frozen visual features in a shared latent space; and
+- detects and localizes anomalies using Scaled Cosine Error reconstruction scores.
+
+Across MVTec AD, VisA, and MPDD, GATE-AD achieves strong detection and localization performance in 1- to 8-shot settings while maintaining low inference latency. See the [paper](https://arxiv.org/abs/2603.15300) for complete results and ablations.
+
+## Installation
+
+Python 3.10 or newer is required.
 
 ```bash
+git clone https://github.com/gthpapadopoulos/GATE-AD.git
 cd GATE-AD
+
 conda create -n gate-ad python=3.10 -y
 conda activate gate-ad
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-pip install -e .
 ```
 
-## Dataset Download And Placement
+## Datasets
 
-Download datasets from their official sources:
-- MVTec AD: https://www.mvtec.com/company/research/datasets/mvtec-ad
-- VisA: https://github.com/amazon-science/spot-diff
-- MPDD: https://github.com/stepanje/MPDD
+Download the datasets from their official sources:
 
-Create dataset folders:
+- [MVTec AD](https://www.mvtec.com/company/research/datasets/mvtec-ad)
+- [VisA](https://github.com/amazon-science/spot-diff)
+- [MPDD](https://github.com/stepanje/MPDD)
 
-```bash
-mkdir -p datasets/mvtec datasets/visa datasets/mpdd
-```
-
-After downloading each dataset archive from the official source, extract/copy contents into those folders.
-
-Place them under `GATE-AD/datasets/` like this:
+Place them under `datasets/`:
 
 ```text
 datasets/
@@ -36,9 +71,7 @@ datasets/
 └── mpdd/
 ```
 
-## Required Dataset Format
-
-MVTec and MPDD are expected in MVTec-style structure:
+MVTec AD and MPDD must follow the MVTec-style layout:
 
 ```text
 <data_root>/<object_name>/
@@ -48,36 +81,22 @@ MVTec and MPDD are expected in MVTec-style structure:
 └── ground_truth/<defect_type>/*_mask.png
 ```
 
-VisA is loaded from `split_csv/1cls.csv` plus image/mask files referenced by that CSV:
-- `configs/defaults/visa.yaml` expects `datasets/visa/split_csv/1cls.csv`
-- Required CSV fields: `object`, `split`, `label`, `image`, `mask`
-- `image` and `mask` paths can be relative to `datasets/visa` or absolute paths
+VisA is loaded from `split_csv/1cls.csv`. The CSV must contain the fields `object`, `split`, `label`, `image`, and `mask`. Image and mask paths may be absolute or relative to `datasets/visa`.
 
-Quick check:
+## Backbone Weights
 
-```bash
-test -f datasets/visa/split_csv/1cls.csv
-```
+Download the official pretrained weights from:
 
-## Official Backbone Weights (DINOv2 / DINOv3)
+- [DINOv2](https://github.com/facebookresearch/dinov2)
+- [DINOv3](https://github.com/facebookresearch/dinov3)
 
-Download the official weights from:
-- DINOv3: https://github.com/facebookresearch/dinov3
-- DINOv2: https://github.com/facebookresearch/dinov2
+Place checkpoints in `weights/`, then pass the path through `--backbone_ckpt` or set `backbone_ckpt` in the dataset configuration file.
 
-Pass checkpoint path with `--backbone_ckpt` in `run_one`/`run_sweep`, or set it in `configs/defaults/*.yaml` as `backbone_ckpt`.
+## Running GATE-AD
 
-## Default Configs
-- `configs/defaults/mvtec.yaml`
-- `configs/defaults/visa.yaml`
-- `configs/defaults/mpdd.yaml`
+Default configurations are provided in `configs/defaults/` for MVTec AD, VisA, and MPDD.
 
-
-
-
-## Example Commands
-
-Run defaults:
+Run one benchmark:
 
 ```bash
 bash scripts/run_mvtec_default.sh
@@ -85,13 +104,15 @@ bash scripts/run_visa_default.sh
 bash scripts/run_mpdd_default.sh
 ```
 
-Run all defaults:
+Run all benchmarks:
 
 ```bash
 bash scripts/run_all_defaults.sh
 ```
 
-Run a single object manually (MVTec defaults, explicit):
+### Run a Single Category
+
+MVTec AD example:
 
 ```bash
 PYTHONPATH=src python -m gate_ad.cli.run_one \
@@ -120,7 +141,7 @@ PYTHONPATH=src python -m gate_ad.cli.run_one \
   --run_name mvtec_screw_example
 ```
 
-Run VisA manual example (VisA defaults, explicit):
+VisA example:
 
 ```bash
 PYTHONPATH=src python -m gate_ad.cli.run_one \
@@ -149,3 +170,20 @@ PYTHONPATH=src python -m gate_ad.cli.run_one \
   --out_dir ./outputs_manual \
   --run_name visa_chewinggum_example
 ```
+
+## Citation
+
+If GATE-AD is useful in your research, please cite:
+
+```bibtex
+@inproceedings{psiris2026gatead,
+  title     = {{GATE-AD}: Graph Attention Network Encoding for Few-Shot Industrial Visual Anomaly Detection},
+  author    = {Psiris, Aggelos and Panagakis, Yannis and Vakalopoulou, Maria and Papadopoulos, Georgios Th.},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2026}
+}
+```
+
+## Acknowledgements
+
+GATE-AD builds on pretrained representations from [DINOv2](https://github.com/facebookresearch/dinov2) and [DINOv3](https://github.com/facebookresearch/dinov3). We thank the authors and maintainers of these projects and the MVTec AD, VisA, and MPDD benchmarks.
